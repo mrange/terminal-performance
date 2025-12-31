@@ -2,11 +2,7 @@
 #define USE_SENDER
 
 using System.Diagnostics;
-using System.Numerics;
 using System.Text;
-using static System.Math;
-using static System.Numerics.Vector;
-using static System.Numerics.Vector3;
 
 Console.OutputEncoding = Encoding.UTF8;
 
@@ -86,11 +82,13 @@ while (isRunning)
 Console.WriteLine("\x1b[!p");
 
 #if USE_SENDER
-class Sender : IDisposable
+sealed class Sender : IDisposable
 {
+  sealed record Data(Buffer? Buffer);
   readonly Thread         _thread;
-  readonly Queue<Buffer?> _queue = new();
   readonly Stream         _stdOut;
+  readonly object         _lock  = new();
+  Data?                   _data  ;
 
   public Sender()
   {
@@ -101,23 +99,22 @@ class Sender : IDisposable
 
   public void Send(Buffer buffer)
   {
-    lock(_queue)
+    lock(_lock)
     {
-      Debug.Assert(_queue.Count<1);
-      _queue.Enqueue(buffer);
-      Monitor.Pulse(_queue);
+      Debug.Assert(_data is null);
+      _data = new(buffer);
+      Monitor.Pulse(_lock);
     }
   }
 
   public void Dispose()
   {
-    lock(_queue)
+    lock(_lock)
     {
-      Debug.Assert(_queue.Count<1);
-      _queue.Clear();
+      Debug.Assert(_data is null);
       // null indicates end
-      _queue.Enqueue(null);
-      Monitor.Pulse(_queue);
+      _data = new(null);
+      Monitor.Pulse(_lock);
     }
     _thread.Join();
     _stdOut.Dispose();
@@ -126,18 +123,19 @@ class Sender : IDisposable
   void OnRun(object? obj)
   {
     var cont=true;
-    lock(_queue)
+    lock(_lock)
     {
       while(cont)
       {
         Buffer? buffer=null;
 
-        while(_queue.Count == 0)
+        while(_data is null)
         {
-          Monitor.Wait(_queue);
+          Monitor.Wait(_lock);
         }
 
-        buffer=_queue.Dequeue();
+        buffer=_data.Buffer;
+        _data = null;
 
         if (buffer is null)
         {
@@ -152,7 +150,7 @@ class Sender : IDisposable
 }
 #endif
 
-class Buffer(int capacity)
+sealed class Buffer(int capacity)
 {
   public byte[] Bytes     = new byte[capacity];
   public int    Position  = 0;
@@ -213,7 +211,6 @@ class Buffer(int capacity)
     Array.Copy(s,0,Bytes,Position,s.Length);
     Position+=s.Length;
   }
-
 }
 
 class Cell()
@@ -237,9 +234,10 @@ class Cell()
     Background=color;
   }
 }
-record Viewport(int Width, int Height);
 
-record RenderContext(Viewport Viewport, Cell[] Cells)
+sealed record Viewport(int Width, int Height);
+
+sealed record RenderContext(Viewport Viewport, Cell[] Cells)
 {
   public Cell? GetCell(int x, int y)
   {
@@ -256,271 +254,4 @@ record struct Color(byte R, byte G, byte B)
 {
   public static readonly Color Black = new(0,0,0);
   public static readonly Color White = new(255,255,255);
-}
-
-abstract class ShaderBase
-{
-    readonly static Vector3 _27   = new(27);
-    readonly static Vector3 _255  = new(255);
-
-    public static float Smoothstep(float edge0, float edge1, float x)
-    {
-      float
-        t=(float)Clamp((x-edge0)/(edge1-edge0),0,1)
-       ;
-      return t*t*(3-2*t);
-    }
-
-    public static Color ToColor(Vector3 c)
-    {
-      var C=Clamp(c,Zero,One)*_255;
-      return new((byte)C.X,(byte)C.Y,(byte)C.Z);
-    }
-
-    public static Vector3 TanhApprox(Vector3 x)
-    {
-      Vector3
-        x2=x*x
-      ;
-      return Clamp(x*(_27+x2)/(_27+9*x2),-One,One);
-    }
-
-    void SeqFor(int fromInclusive, int toExclusive, Action<int> body)
-    {
-        for(var i=fromInclusive;i<toExclusive;++i) 
-        {
-          body(i);
-        }
-    }
-
-    public void Render(RenderContext context, double time)
-    {
-        int width = context.Viewport.Width;
-        int height = context.Viewport.Height;
-
-        Setup(width, height+height, time);
-
-        // Not sure if Spectre handles parallel assignments?
-        //  At least we won't modify the same cell from multiple threads
-        Parallel.For(0, width, x =>
-        {
-            for (var y = 0; y < height; y++)
-            {
-                var c = context.GetCell(x,y);
-                if (c is not null)
-                {
-                  // Resolution doubler: U+2580
-                  c.SetSymbol('\x2580');
-                  c.SetForeground(Run(x, y+y+0));
-                  c.SetBackground(Run(x, y+y+1));
-                }
-            }
-        });
-    }
-
-    protected abstract void Setup(int width, int height, double time);
-    protected abstract Color Run(int x, int y);
-}
-
-sealed class ApolloShader : ShaderBase
-{
-  readonly static Vector3 _Base = new(2,1,0);
-
-  float   _inv;
-  float   _fad;
-  float   _sin;
-  Vector2 _res;
-  Vector3 _rot;
-
-  protected override void Setup(int width, int height, double time)
-  {
-    float
-      t=(float)time
-    ;
-    _res=new(width, height);
-    _inv=1/_res.Y;
-    _rot=Normalize(Sin(new Vector3(.2F*t+123)+new Vector3(0,1,2)));
-    _sin=(float)Sin(.123*time);
-#if DEBUG_WEIRD_FPS
-    _fad=(float)(.25+.25*Cos(time));
-#else
-    _fad=.5F;
-#endif
-  }
-
-  protected override Color Run(int x, int y)
-  {
-    Vector2
-      c=new (x,y)
-    , p=(c+c-_res)*_inv
-    ;
-
-    Vector3
-      P=new(p.X,p.Y,.5F*_sin)
-    ;
-
-    float
-      s=1
-    , k
-    ;
-
-    P=Dot(P,_rot)*_rot+Cross(P,_rot);
-
-    for(int i=0; i<3;++i)
-    {
-      P-=2F*Round(.5F*P);
-      k=1.41F/Dot(P,P);
-      P*=k;
-      s*=k;
-    }
-
-    P=Abs(P)/s;
-    k=Min(P.Z, new Vector2(P.X,P.Y).Length());
-
-    return ToColor(
-        k<5E-3F
-      ? One
-      : _fad/(1+k*k*5)*(One+Sin(_Base+new Vector3((float)(2+Log2(k)))))
-      );
-  }
-}
-
-sealed class BoxShader : ShaderBase
-{
-  readonly static Vector3 _Base = new(-0.7F,-0.2F,0.3F);
-
-  float   _inv;
-  float   _fad;
-  Vector2 _res;
-  Vector3 _rot;
-
-  protected override void Setup(int width, int height, double time)
-  {
-    float
-      t=(float)time
-    ;
-    _res=new(width, height);
-    _inv=1/_res.Y;
-    _rot=Normalize(Sin(new Vector3(t)+new Vector3(0,1,2)));
-    _fad=.5F;
-  }
-
-  protected override Color Run(int x, int y)
-  {
-    Vector2
-      c=new (x,y)
-    , p=(c+c-_res)*_inv
-    ;
-
-    Vector3
-      P
-    , R=Normalize(new(p.X,p.Y,2))
-    , r=_rot
-    ;
-
-    float
-      z=0
-    , d=1
-    ;
-
-    int
-      i
-    ;
-
-    // No comments necessary...
-    for(i=0;i<49&&z<4&&d>1e-3;++i)
-    {
-      P=z*R;
-      P.Z-=3;
-      P=Dot(P,r)*r+Cross(P,r);
-      P*=P;
-      d=(float)Sqrt(Sqrt(Dot(P,P)))-1;
-      z+=d;
-    }
-
-    return ToColor(
-        z<4
-      ? _fad*(One+Sin(_Base-new Vector3(i/33F+2*(p.X+p.Y))))
-      : Zero
-      );
-  }
-}
-
-sealed class LandscapeShader : ShaderBase
-{
-  readonly static Vector3 _Base = new(-0.7F,-0.2F,0.3F);
-
-  float     _time;
-  Vector2   _res;
-
-  protected override void Setup(int width, int height, double time)
-  {
-    _time=(float)time;
-    _res=new(width, height);
-  }
-
-  protected override Color Run(int x, int y)
-  {
-    float
-        d=1
-      , z=0
-      , a
-      , s
-      , t=_time
-      ;
-
-    Vector2
-        r=_res
-      , D
-      , P
-      , C
-      , S
-      ;
-
-    Vector3
-        O=Zero
-      , p
-      , R=Normalize(new(new Vector2(x,r.Y-y)-new Vector2(.5F,1)*r, r.Y))
-      , ground=new(0,2,2)
-      , sky=new(2,6,0)
-      ;
-
-    Matrix3x2
-        rot=new(1.2F,1.6F,-1.6F,1.2F,0,0)
-      ;
-    
-    for(int i=0;i<50&&d>1e-3;++i) 
-    {
-      p=z*R;
-      p.Z+=t;
-      P=.23F*(new Vector2(p.X,p.Z));
-      D=Vector2.Zero;
-      s=p.Y+4;
-      d=Abs(s)+.6F;
-      a=1;
-
-      for(int j=0;j<5;++j) 
-      {
-        (S,C)=Vector2.SinCos(P);
-        p=(new Vector3(C.X,S.X,S.X))*(new Vector3(S.Y,C.Y,S.Y));
-        D+=new Vector2(p.X,p.Y);
-        d-=a*(1+p.Z)/(1+3*Vector2.Dot(D,D));
-        P=Vector2.Transform(P,rot);
-        a*=.55F;
-      }
-
-      if(s>0) 
-      {
-        O+=One+d*ground;
-      } 
-      else 
-      {
-        O+=sky;
-      }
-
-      z+=d;
-    }
-
-    return ToColor(TanhApprox(O*1E-2F));
-  }
 }
