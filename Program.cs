@@ -57,7 +57,7 @@ while (isRunning)
     current.WriteCell(cells[i]);
   }
 
-  current.WriteString($"\r\u001b[49m\x1b[39m#{frameNo}, FPS:{fpsFrameNo/(sw.Elapsed.TotalSeconds-fpsStart):0}, RES:{viewPort.Width}x{viewPort}");
+  current.WriteString($"\r\u001b[49m\x1b[39m#{frameNo}, FPS:{fpsFrameNo/(sw.Elapsed.TotalSeconds-fpsStart):0}, RES:{viewPort.Width}x{viewPort.Height}");
 
   (current, send) = (send, current);
 
