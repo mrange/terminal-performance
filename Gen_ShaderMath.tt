@@ -25,6 +25,7 @@ static partial class ShaderMath
   shuffle2[b]="1";
 #>
   static readonly Vector4 _mask<#=suffix#> = Vector128.Create(<#=string.Join(",",mask)#>).AsSingle().AsVector4();
+  [MethodImpl(MethodImplOptions.AggressiveInlining)]
   public static Vector4 Rot<#=suffix#>(Vector4 r, Vector4 p)
   {
     return Vector4.FusedMultiplyAdd(
@@ -44,6 +45,7 @@ static partial class ShaderMath
 <# 
   var suffix=SelectorToString(a)+SelectorToString(b);
 #>
+  [MethodImpl(MethodImplOptions.AggressiveInlining)]
   public static Vector3 Rot<#=suffix#>(Vector4 r, Vector3 p)
   {
     return Rot<#=suffix#>(r,p.AsVector4()).AsVector3();
@@ -55,6 +57,7 @@ static partial class ShaderMath
 <# 
   var suffix=SelectorToString(a)+SelectorToString(b);
 #>
+  [MethodImpl(MethodImplOptions.AggressiveInlining)]
   public static Vector2 Rot<#=suffix#>(Vector4 r, Vector2 p)
   {
     return Rot<#=suffix#>(r,p.AsVector4()).AsVector2();

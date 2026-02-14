@@ -1,6 +1,4 @@
-﻿using System.Runtime.CompilerServices;
-using System.Runtime.Intrinsics;
-
+﻿
 static partial class ShaderMath
 {
   readonly static Vector3 _27     = new(27);
@@ -8,7 +6,6 @@ static partial class ShaderMath
   readonly static Vector3 _linear = new(.2126F, .7152F, .0722F);
   readonly static Vector3 _srgb   = new(.2990F, .5870F, .1140F);
   readonly static Vector3 _rota   = new(0,11,33);
-  readonly static Vector4 _maskzw = Vector128.Create(0,0,~0,~0).AsSingle().AsVector4();
 
   [MethodImpl(MethodImplOptions.AggressiveInlining)]
   public static float LumLinear(Vector3 x)
@@ -52,34 +49,6 @@ static partial class ShaderMath
     var (s,c) = SinCos(a);
     return new (c,s,-s,0);
   }
-
-  /*
-  [MethodImpl(MethodImplOptions.AggressiveInlining)]
-  public static Vector4 RotXY(Vector4 r, Vector4 p)
-  {
-    return Vector4.FusedMultiplyAdd(
-      Vector4.Shuffle(r,2,1,3,3)
-    , Vector4.Shuffle(p,1,0,2,3)
-    , Vector4.FusedMultiplyAdd(
-        Vector4.Shuffle(r,0,0,3,3)
-      , p
-      , Vector4.BitwiseAnd(p,_maskzw)
-      )
-    );
-  }
-  [MethodImpl(MethodImplOptions.AggressiveInlining)]
-  public static Vector3 RotXY(Vector4 r, Vector3 p)
-  {
-    return RotXY(r,p.AsVector4()).AsVector3();
-  }
-
-  [MethodImpl(MethodImplOptions.AggressiveInlining)]
-  public static Vector2 RotXY(Vector4 r, Vector2 p)
-  {
-    return RotXY(r,p.AsVector4()).AsVector2();
-  }
-
-  */
 
   public static Color ToColor(Vector3 c)
   {

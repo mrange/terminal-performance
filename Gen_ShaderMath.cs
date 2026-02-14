@@ -2,6 +2,7 @@
 static partial class ShaderMath
 {
   static readonly Vector4 _maskXY = Vector128.Create(0,0,~0,~0).AsSingle().AsVector4();
+  [MethodImpl(MethodImplOptions.AggressiveInlining)]
   public static Vector4 RotXY(Vector4 r, Vector4 p)
   {
     return Vector4.FusedMultiplyAdd(
@@ -16,6 +17,7 @@ static partial class ShaderMath
   }
 
   static readonly Vector4 _maskXZ = Vector128.Create(0,~0,0,~0).AsSingle().AsVector4();
+  [MethodImpl(MethodImplOptions.AggressiveInlining)]
   public static Vector4 RotXZ(Vector4 r, Vector4 p)
   {
     return Vector4.FusedMultiplyAdd(
@@ -30,6 +32,7 @@ static partial class ShaderMath
   }
 
   static readonly Vector4 _maskXW = Vector128.Create(0,~0,~0,0).AsSingle().AsVector4();
+  [MethodImpl(MethodImplOptions.AggressiveInlining)]
   public static Vector4 RotXW(Vector4 r, Vector4 p)
   {
     return Vector4.FusedMultiplyAdd(
@@ -44,6 +47,7 @@ static partial class ShaderMath
   }
 
   static readonly Vector4 _maskYX = Vector128.Create(0,0,~0,~0).AsSingle().AsVector4();
+  [MethodImpl(MethodImplOptions.AggressiveInlining)]
   public static Vector4 RotYX(Vector4 r, Vector4 p)
   {
     return Vector4.FusedMultiplyAdd(
@@ -58,6 +62,7 @@ static partial class ShaderMath
   }
 
   static readonly Vector4 _maskYZ = Vector128.Create(~0,0,0,~0).AsSingle().AsVector4();
+  [MethodImpl(MethodImplOptions.AggressiveInlining)]
   public static Vector4 RotYZ(Vector4 r, Vector4 p)
   {
     return Vector4.FusedMultiplyAdd(
@@ -72,6 +77,7 @@ static partial class ShaderMath
   }
 
   static readonly Vector4 _maskYW = Vector128.Create(~0,0,~0,0).AsSingle().AsVector4();
+  [MethodImpl(MethodImplOptions.AggressiveInlining)]
   public static Vector4 RotYW(Vector4 r, Vector4 p)
   {
     return Vector4.FusedMultiplyAdd(
@@ -86,6 +92,7 @@ static partial class ShaderMath
   }
 
   static readonly Vector4 _maskZX = Vector128.Create(0,~0,0,~0).AsSingle().AsVector4();
+  [MethodImpl(MethodImplOptions.AggressiveInlining)]
   public static Vector4 RotZX(Vector4 r, Vector4 p)
   {
     return Vector4.FusedMultiplyAdd(
@@ -100,6 +107,7 @@ static partial class ShaderMath
   }
 
   static readonly Vector4 _maskZY = Vector128.Create(~0,0,0,~0).AsSingle().AsVector4();
+  [MethodImpl(MethodImplOptions.AggressiveInlining)]
   public static Vector4 RotZY(Vector4 r, Vector4 p)
   {
     return Vector4.FusedMultiplyAdd(
@@ -114,6 +122,7 @@ static partial class ShaderMath
   }
 
   static readonly Vector4 _maskZW = Vector128.Create(~0,~0,0,0).AsSingle().AsVector4();
+  [MethodImpl(MethodImplOptions.AggressiveInlining)]
   public static Vector4 RotZW(Vector4 r, Vector4 p)
   {
     return Vector4.FusedMultiplyAdd(
@@ -128,6 +137,7 @@ static partial class ShaderMath
   }
 
   static readonly Vector4 _maskWX = Vector128.Create(0,~0,~0,0).AsSingle().AsVector4();
+  [MethodImpl(MethodImplOptions.AggressiveInlining)]
   public static Vector4 RotWX(Vector4 r, Vector4 p)
   {
     return Vector4.FusedMultiplyAdd(
@@ -142,6 +152,7 @@ static partial class ShaderMath
   }
 
   static readonly Vector4 _maskWY = Vector128.Create(~0,0,~0,0).AsSingle().AsVector4();
+  [MethodImpl(MethodImplOptions.AggressiveInlining)]
   public static Vector4 RotWY(Vector4 r, Vector4 p)
   {
     return Vector4.FusedMultiplyAdd(
@@ -156,6 +167,7 @@ static partial class ShaderMath
   }
 
   static readonly Vector4 _maskWZ = Vector128.Create(~0,~0,0,0).AsSingle().AsVector4();
+  [MethodImpl(MethodImplOptions.AggressiveInlining)]
   public static Vector4 RotWZ(Vector4 r, Vector4 p)
   {
     return Vector4.FusedMultiplyAdd(
@@ -170,42 +182,50 @@ static partial class ShaderMath
   }
 
 
+  [MethodImpl(MethodImplOptions.AggressiveInlining)]
   public static Vector3 RotXY(Vector4 r, Vector3 p)
   {
     return RotXY(r,p.AsVector4()).AsVector3();
   }
 
+  [MethodImpl(MethodImplOptions.AggressiveInlining)]
   public static Vector3 RotXZ(Vector4 r, Vector3 p)
   {
     return RotXZ(r,p.AsVector4()).AsVector3();
   }
 
+  [MethodImpl(MethodImplOptions.AggressiveInlining)]
   public static Vector3 RotYX(Vector4 r, Vector3 p)
   {
     return RotYX(r,p.AsVector4()).AsVector3();
   }
 
+  [MethodImpl(MethodImplOptions.AggressiveInlining)]
   public static Vector3 RotYZ(Vector4 r, Vector3 p)
   {
     return RotYZ(r,p.AsVector4()).AsVector3();
   }
 
+  [MethodImpl(MethodImplOptions.AggressiveInlining)]
   public static Vector3 RotZX(Vector4 r, Vector3 p)
   {
     return RotZX(r,p.AsVector4()).AsVector3();
   }
 
+  [MethodImpl(MethodImplOptions.AggressiveInlining)]
   public static Vector3 RotZY(Vector4 r, Vector3 p)
   {
     return RotZY(r,p.AsVector4()).AsVector3();
   }
 
 
+  [MethodImpl(MethodImplOptions.AggressiveInlining)]
   public static Vector2 RotXY(Vector4 r, Vector2 p)
   {
     return RotXY(r,p.AsVector4()).AsVector2();
   }
 
+  [MethodImpl(MethodImplOptions.AggressiveInlining)]
   public static Vector2 RotYX(Vector4 r, Vector2 p)
   {
     return RotYX(r,p.AsVector4()).AsVector2();
