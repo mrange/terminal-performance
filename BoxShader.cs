@@ -1,4 +1,5 @@
 ﻿using static System.Numerics.Vector3;
+using static ShaderMath;
 
 sealed class BoxShader : ShaderBase
 {
@@ -8,6 +9,7 @@ sealed class BoxShader : ShaderBase
   float   _fad;
   Vector2 _res;
   Vector3 _rot;
+  Vector4 _ROT;
 
   protected override void Setup(int width, int height, double time)
   {
@@ -18,6 +20,7 @@ sealed class BoxShader : ShaderBase
     _inv=1/_res.Y;
     _rot=Normalize(Sin(new Vector3(t)+new Vector3(0,1,2)));
     _fad=.5F;
+    _ROT=Rot(t);
   }
 
   protected override Color Run(int x, int y)
@@ -58,6 +61,7 @@ sealed class BoxShader : ShaderBase
 
     C=z<4?_fad*(One+Sin(_Base-new Vector3(i/33F+2*(p.X+p.Y)))):Zero;
 
+    p=RotXY(_ROT,p);
     p*=.5F;
     p.X*=80F/128F;
     p+=new Vector2(.5F);

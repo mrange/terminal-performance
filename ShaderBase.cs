@@ -1,47 +1,5 @@
-﻿using System.Runtime.CompilerServices;
-using static System.Numerics.Vector3;
-
-abstract class ShaderBase
+﻿abstract class ShaderBase
 {
-  readonly static Vector3 _27   = new(27);
-  readonly static Vector3 _255  = new(255);
-
-  [MethodImpl(MethodImplOptions.AggressiveInlining)]
-  public static float LumLinear(Vector3 x)
-  {
-    return Dot(x,new(.2126F, .7152F, .0722F));
-  }
-
-  [MethodImpl(MethodImplOptions.AggressiveInlining)]
-  public static float LumSrgb(Vector3 x)
-  {
-    return Dot(x,new(.299F, .587F, .114F));
-  }
-
-  [MethodImpl(MethodImplOptions.AggressiveInlining)]
-  public static float Smoothstep(float edge0, float edge1, float x)
-  {
-    float
-      t=(float)Math.Clamp((x-edge0)/(edge1-edge0),0,1)
-      ;
-    return t*t*(3-2*t);
-  }
-
-  [MethodImpl(MethodImplOptions.AggressiveInlining)]
-  public static Vector3 TanhApprox(Vector3 x)
-  {
-    Vector3
-      x2=x*x
-    ;
-    return Clamp(x*(_27+x2)/(_27+9*x2),-One,One);
-  }
-
-  public static Color ToColor(Vector3 c)
-  {
-    var C=Clamp(c,Zero,One)*_255;
-    return new((byte)C.X,(byte)C.Y,(byte)C.Z);
-  }
-
   void SeqFor(int fromInclusive, int toExclusive, Action<int> body)
   {
     for(var i=fromInclusive;i<toExclusive;++i) 
