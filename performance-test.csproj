@@ -18,6 +18,22 @@
     <None Update="assets\mandus.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Update="Gen_ShaderMath.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>Gen_ShaderMath.cs</LastGenOutput>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Service Include="{508349b6-6b84-4df5-91f0-309beebad82d}" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="Gen_ShaderMath.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Gen_ShaderMath.tt</DependentUpon>
+    </Compile>
   </ItemGroup>
 
 </Project>

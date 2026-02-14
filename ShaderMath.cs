@@ -1,14 +1,13 @@
 ﻿using System.Runtime.CompilerServices;
 using System.Runtime.Intrinsics;
 
-static class ShaderMath
+static partial class ShaderMath
 {
   readonly static Vector3 _27     = new(27);
   readonly static Vector3 _255    = new(255);
   readonly static Vector3 _linear = new(.2126F, .7152F, .0722F);
   readonly static Vector3 _srgb   = new(.2990F, .5870F, .1140F);
   readonly static Vector3 _rota   = new(0,11,33);
-  readonly static Vector4 _unit   = new(0,1,2,3);
   readonly static Vector4 _maskzw = Vector128.Create(0,0,~0,~0).AsSingle().AsVector4();
 
   [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -54,6 +53,7 @@ static class ShaderMath
     return new (c,s,-s,0);
   }
 
+  /*
   [MethodImpl(MethodImplOptions.AggressiveInlining)]
   public static Vector4 RotXY(Vector4 r, Vector4 p)
   {
@@ -67,7 +67,6 @@ static class ShaderMath
       )
     );
   }
-
   [MethodImpl(MethodImplOptions.AggressiveInlining)]
   public static Vector3 RotXY(Vector4 r, Vector3 p)
   {
@@ -79,6 +78,8 @@ static class ShaderMath
   {
     return RotXY(r,p.AsVector4()).AsVector2();
   }
+
+  */
 
   public static Color ToColor(Vector3 c)
   {

@@ -61,7 +61,7 @@ sealed class BoxShader : ShaderBase
 
     C=z<4?_fad*(One+Sin(_Base-new Vector3(i/33F+2*(p.X+p.Y)))):Zero;
 
-    p=RotXY(_ROT,p);
+    p=RotYX(_ROT,p);
     p*=.5F;
     p.X*=80F/128F;
     p+=new Vector2(.5F);

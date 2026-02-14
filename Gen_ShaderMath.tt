@@ -1,0 +1,95 @@
+﻿<#@ assembly name="System.Core"     #>
+<#@ import namespace="System.Linq"  #>
+
+static partial class ShaderMath
+{
+<# foreach (var (a,b) in AllPerm2OverX(4)) { #>
+<# 
+  var suffix=SelectorToString(a)+SelectorToString(b);
+
+  var mask = new [] {"~0","~0","~0","~0"};
+  mask[a]="0";
+  mask[b]="0";
+
+  var shuffle0 = new [] {"3","3","3","3"};
+  shuffle0[a]="0";
+  shuffle0[b]="0";
+
+  var shuffle1 = new [] {"0","1","2","3"};
+  var tmp=shuffle1[a];
+  shuffle1[a]=shuffle1[b];
+  shuffle1[b]=tmp;
+
+  var shuffle2 = new [] {"3","3","3","3"};
+  shuffle2[a]="2";
+  shuffle2[b]="1";
+#>
+  static readonly Vector4 _mask<#=suffix#> = Vector128.Create(<#=string.Join(",",mask)#>).AsSingle().AsVector4();
+  public static Vector4 Rot<#=suffix#>(Vector4 r, Vector4 p)
+  {
+    return Vector4.FusedMultiplyAdd(
+      Vector4.Shuffle(r,<#=string.Join(",",shuffle2)#>)
+    , Vector4.Shuffle(p,<#=string.Join(",",shuffle1)#>)
+    , Vector4.FusedMultiplyAdd(
+        Vector4.Shuffle(r,<#=string.Join(",",shuffle0)#>)
+      , p
+      , Vector4.BitwiseAnd(p,_mask<#=suffix#>)
+      )
+    );
+  }
+
+<# } #>
+
+<# foreach (var (a,b) in AllPerm2OverX(3)) { #>
+<# 
+  var suffix=SelectorToString(a)+SelectorToString(b);
+#>
+  public static Vector3 Rot<#=suffix#>(Vector4 r, Vector3 p)
+  {
+    return Rot<#=suffix#>(r,p.AsVector4()).AsVector3();
+  }
+
+<# } #>
+
+<# foreach (var (a,b) in AllPerm2OverX(2)) { #>
+<# 
+  var suffix=SelectorToString(a)+SelectorToString(b);
+#>
+  public static Vector2 Rot<#=suffix#>(Vector4 r, Vector2 p)
+  {
+    return Rot<#=suffix#>(r,p.AsVector4()).AsVector2();
+  }
+
+<# } #>
+}
+
+<#+
+  string SelectorToString(int i)
+  {
+    switch(i)
+    {
+      case 0: return "X";
+      case 1: return "Y";
+      case 2: return "Z";
+      case 3: return "W";
+      default: return "!";
+    }
+  }
+
+  (int,int)[] AllPerm2OverX(int x)
+  {
+    return
+      (
+        from a in Enumerable.Range(0, x)
+        from b in Enumerable.Range(0, x)
+        where a!=b
+        select (a,b)
+      )
+      .Distinct()
+      .ToArray()
+      ;
+  }
+
+
+
+#>
