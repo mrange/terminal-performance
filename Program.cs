@@ -1,8 +1,4 @@
-﻿// Gives me a few extra FPS
-#define USE_SENDER
-
-using System.Diagnostics;
-using System.Text;
+﻿#define USE_SENDER
 
 Console.OutputEncoding = Encoding.UTF8;
 
@@ -23,7 +19,7 @@ var renderContext = new RenderContext(
   );
 
 var sw        = Stopwatch.StartNew();
-var shader    = new LandscapeShader();
+var shader    = new BoxShader();
 var capacity  = viewPort.Width*viewPort.Height*64;
 var current   = new Buffer(capacity);
 var send      = new Buffer(capacity);
@@ -54,12 +50,12 @@ while (isRunning)
 
   current.WritePrelude();
   
-  for(var i=0;i<cells.Length-viewPort.Width;++i)
+  for(var i=0;i<cells.Length;++i)
   {
     current.WriteCell(cells[i]);
   }
 
-  current.WriteString($"\u001b[49m\x1b[39m#{frameNo}, FPS:{fpsFrameNo/(sw.Elapsed.TotalSeconds-fpsStart):0}       ");
+  current.WriteString($"\r\u001b[49m\x1b[39m#{frameNo}, FPS:{fpsFrameNo/(sw.Elapsed.TotalSeconds-fpsStart):0}, RES:{viewPort.Width}x{viewPort}");
 
   (current, send) = (send, current);
 
@@ -241,7 +237,7 @@ sealed record RenderContext(Viewport Viewport, Cell[] Cells)
 {
   public Cell? GetCell(int x, int y)
   {
-    var i=x+Viewport.Width*y;
+    var i=Viewport.Width*y+x;
     return 
         i>-1&&i<Cells.Length
       ? Cells[i]

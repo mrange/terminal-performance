@@ -1,7 +1,4 @@
-﻿using System.Numerics;
-using static System.Math;
-using static System.Numerics.Vector;
-using static System.Numerics.Vector3;
+﻿using static System.Numerics.Vector3;
 
 sealed class BoxShader : ShaderBase
 {
