@@ -2,6 +2,8 @@
 
 Console.OutputEncoding = Encoding.UTF8;
 
+Environment.CurrentDirectory = AppDomain.CurrentDomain.BaseDirectory;
+
 var viewPort = new Viewport(
     Width : Console.BufferWidth
   , Height: Console.BufferHeight
@@ -237,12 +239,8 @@ sealed record RenderContext(Viewport Viewport, Cell[] Cells)
 {
   public Cell? GetCell(int x, int y)
   {
-    var i=Viewport.Width*y+x;
-    return 
-        i>-1&&i<Cells.Length
-      ? Cells[i]
-      : null
-      ;
+    if(x<0||x>=Viewport.Width||y<0||y>=Viewport.Height) return null;
+    return Cells[Viewport.Width*y+x];
   }
 }
 
