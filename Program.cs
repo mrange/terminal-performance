@@ -1,5 +1,7 @@
 ﻿#define USE_SENDER
 
+using System.Runtime.CompilerServices;
+
 Console.OutputEncoding = Encoding.UTF8;
 
 Environment.CurrentDirectory = AppDomain.CurrentDomain.BaseDirectory;
@@ -204,10 +206,20 @@ sealed class Buffer(int capacity)
     WriteBytes(ToUTF8(s));
   }
 
+  [MethodImpl(MethodImplOptions.AggressiveInlining)]
   public void WriteBytes(byte[] s)
   {
+  /*
     Array.Copy(s,0,Bytes,Position,s.Length);
     Position+=s.Length;
+    */
+    var t=Bytes;
+    var p=Position;
+    for (var i=0; i<s.Length; ++i)
+    {
+      t[p+i] = s[i];
+    }
+    Position=p+s.Length;
   }
 }
 
