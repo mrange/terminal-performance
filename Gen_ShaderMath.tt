@@ -3,6 +3,27 @@
 
 static partial class ShaderMath
 {
+<# for (var i=2;i<5;++i) { #>
+  [MethodImpl(MethodImplOptions.AggressiveInlining)]
+  public static Vector<#=i#> Floor(Vector<#=i#> x)
+  {
+    return Vector128.Floor(x.AsVector128()).AsVector<#=i#>();
+  }
+
+  [MethodImpl(MethodImplOptions.AggressiveInlining)]
+  public static Vector<#=i#> Fract(Vector<#=i#> x)
+  {
+    return x-Floor(x);
+  }
+
+  [MethodImpl(MethodImplOptions.AggressiveInlining)]
+  public static Vector<#=i#> Mod2(Vector<#=i#> x)
+  {
+    return Floor(x)-2F*Floor(.5F*x);
+  }
+
+<# } #>
+
 <# foreach (var (a,b) in AllPerm2OverX(4)) { #>
 <# 
   var suffix=SelectorToString(a)+SelectorToString(b);

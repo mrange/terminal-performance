@@ -1,6 +1,61 @@
 ﻿
 static partial class ShaderMath
 {
+  [MethodImpl(MethodImplOptions.AggressiveInlining)]
+  public static Vector2 Floor(Vector2 x)
+  {
+    return Vector128.Floor(x.AsVector128()).AsVector2();
+  }
+
+  [MethodImpl(MethodImplOptions.AggressiveInlining)]
+  public static Vector2 Fract(Vector2 x)
+  {
+    return x-Floor(x);
+  }
+
+  [MethodImpl(MethodImplOptions.AggressiveInlining)]
+  public static Vector2 Mod2(Vector2 x)
+  {
+    return Floor(x)-2F*Floor(.5F*x);
+  }
+
+  [MethodImpl(MethodImplOptions.AggressiveInlining)]
+  public static Vector3 Floor(Vector3 x)
+  {
+    return Vector128.Floor(x.AsVector128()).AsVector3();
+  }
+
+  [MethodImpl(MethodImplOptions.AggressiveInlining)]
+  public static Vector3 Fract(Vector3 x)
+  {
+    return x-Floor(x);
+  }
+
+  [MethodImpl(MethodImplOptions.AggressiveInlining)]
+  public static Vector3 Mod2(Vector3 x)
+  {
+    return Floor(x)-2F*Floor(.5F*x);
+  }
+
+  [MethodImpl(MethodImplOptions.AggressiveInlining)]
+  public static Vector4 Floor(Vector4 x)
+  {
+    return Vector128.Floor(x.AsVector128()).AsVector4();
+  }
+
+  [MethodImpl(MethodImplOptions.AggressiveInlining)]
+  public static Vector4 Fract(Vector4 x)
+  {
+    return x-Floor(x);
+  }
+
+  [MethodImpl(MethodImplOptions.AggressiveInlining)]
+  public static Vector4 Mod2(Vector4 x)
+  {
+    return Floor(x)-2F*Floor(.5F*x);
+  }
+
+
   static readonly Vector4 _maskXY = Vector128.Create(0,0,~0,~0).AsSingle().AsVector4();
   [MethodImpl(MethodImplOptions.AggressiveInlining)]
   public static Vector4 RotXY(Vector4 r, Vector4 p)

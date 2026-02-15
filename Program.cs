@@ -23,7 +23,7 @@ var renderContext = new RenderContext(
   );
 
 var sw        = Stopwatch.StartNew();
-var shader    = new BoxShader();
+var shader    = new DolphinShader();
 var capacity  = viewPort.Width*viewPort.Height*64;
 var current   = new Buffer(capacity);
 var send      = new Buffer(capacity);

@@ -1,7 +1,4 @@
-﻿using static System.Numerics.Vector3;
-using static ShaderMath;
-
-sealed class BoxShader : ShaderBase
+﻿sealed class BoxShader : ShaderBase
 {
   readonly static Vector3 _Base = new(-0.7F,-0.2F,0.3F);
 
@@ -9,7 +6,6 @@ sealed class BoxShader : ShaderBase
   float   _fad;
   Vector2 _res;
   Vector3 _rot;
-  Vector4 _ROT;
 
   protected override void Setup(int width, int height, double time)
   {
@@ -20,13 +16,10 @@ sealed class BoxShader : ShaderBase
     _inv=1/_res.Y;
     _rot=Normalize(Sin(new Vector3(t)+new Vector3(0,1,2)));
     _fad=.5F;
-    _ROT=Rot(t);
   }
 
   protected override Color Run(int x, int y)
   {
-    var tex = Assets.Tex_Mandus;
-
     Vector2
       c=new (x,y)
     , p=(c+c-_res)*_inv
@@ -34,7 +27,7 @@ sealed class BoxShader : ShaderBase
 
     Vector3
       P
-    , R=Normalize(new(p.X,p.Y,2))
+    , R=Vector3.Normalize(new(p.X,p.Y,2))
     , r=_rot
     , C
     ;
@@ -59,14 +52,7 @@ sealed class BoxShader : ShaderBase
       z+=d;
     }
 
-    C=z<4?_fad*(One+Sin(_Base-new Vector3(i/33F+2*(p.X+p.Y)))):Zero;
-
-    p=RotYX(_ROT,p);
-    p*=.5F;
-    p.X*=80F/128F;
-    p+=new Vector2(.5F);
-    var T=tex.Linear(p);
-    C=Lerp(C,T.AsVector3(),T.W);
+    C=z<4?_fad*(Vector3.One+Sin(_Base-new Vector3(i/33F+2*(p.X+p.Y)))):Vector3.Zero;
 
     return ToColor(C);
   }
