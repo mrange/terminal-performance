@@ -1,6 +1,5 @@
 ﻿#define USE_SENDER
-
-using System.Runtime.CompilerServices;
+#define USE_BACKBUFFER
 
 Console.OutputEncoding = Encoding.UTF8;
 
@@ -38,10 +37,12 @@ using var sender = new Sender();
 using var stdOut = Console.OpenStandardOutput();
 #endif
 
+#if USE_BACKBUFFER
+var bufferState=true;
+#endif
 
 while (isRunning)
 {
-  current.Clear();
   ++frameNo;
   ++fpsFrameNo;
   if(fpsFrameNo>120)
@@ -49,6 +50,13 @@ while (isRunning)
     fpsFrameNo= 0;
     fpsStart  = sw.Elapsed.TotalSeconds;
   }
+
+  current.Clear();
+
+#if USE_BACKBUFFER
+  current.WriteDisableDECPCCM();
+  current.WriteMoveToBuffer(bufferState);
+#endif
 
   shader.Render(renderContext, sw.Elapsed.TotalSeconds);
 
@@ -60,6 +68,11 @@ while (isRunning)
   }
 
   current.WriteString($"\r\u001b[49m\x1b[39m#{frameNo}, FPS:{fpsFrameNo/(sw.Elapsed.TotalSeconds-fpsStart):0}, RES:{viewPort.Width}x{viewPort.Height}");
+
+#if USE_BACKBUFFER
+  current.WriteEnableDECPCCM();
+  bufferState=!bufferState;
+#endif
 
   (current, send) = (send, current);
 
@@ -170,6 +183,11 @@ sealed class Buffer(int capacity)
     .Select(i => ToUTF8($";{i}"))
     .ToArray()
     ;
+  readonly byte[]   utf8_disable_DECPCCM  = ToUTF8("\x1B[?64l");
+  readonly byte[]   utf8_enable_DECPCCM   = ToUTF8("\x1B[?64h");
+  readonly byte[]   utf8_move_to_page_1   = ToUTF8("\x1B[1 P");
+  readonly byte[]   utf8_move_to_page_2   = ToUTF8("\x1B[2 P");
+
 
   public void Clear()
   { 
@@ -179,6 +197,21 @@ sealed class Buffer(int capacity)
   public void WritePrelude()
   {
     WriteBytes(utf8_Prelude);
+  }
+
+  public void WriteDisableDECPCCM()
+  {
+    WriteBytes(utf8_disable_DECPCCM);
+  }
+
+  public void WriteEnableDECPCCM()
+  {
+    WriteBytes(utf8_enable_DECPCCM);
+  }
+
+  public void WriteMoveToBuffer(bool b)
+  {
+    WriteBytes(b?utf8_move_to_page_1:utf8_move_to_page_2);
   }
 
   public void WriteCell(Cell c)
