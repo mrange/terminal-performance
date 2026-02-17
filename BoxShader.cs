@@ -18,7 +18,7 @@
     _fad=.5F;
   }
 
-  protected override Color Run(int x, int y)
+  protected override Color Run(int x, int y, Color previous)
   {
     Vector2
       c=new (x,y)

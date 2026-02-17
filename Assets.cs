@@ -2,6 +2,7 @@
 {
   public readonly static Texture Tex_Mandus   = Texture.LoadFromFile(@"assets/mandus.png");
   public readonly static Texture Tex_Font8x16 = Texture.LoadFromFile(@"assets/font_amiga_topaz.png");
+  public readonly static Texture Tex_Impulse  = Texture.LoadFromFile(@"assets/impulse.png");
 
 
   public readonly static Vector3[] Palette_SRGB_Tic80=

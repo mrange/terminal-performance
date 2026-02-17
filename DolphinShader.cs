@@ -21,7 +21,7 @@
     _fontY=(int)(160*(.25+t*t))-20;
   }
 
-  protected override Color Run(int x, int y)
+  protected override Color Run(int x, int y, Color previous)
   {
     Vector2
       c=new (x,y)
@@ -35,7 +35,7 @@
     Vector4
       T
     ;
-    C=Assets.Palette_SRGB_Tic80[y&0xF];
+    C=Assets.Palette_SRGB_Tic80[((x+y)>>2)&0xF];
     p*=.5F;
     p+=Cos(_t*new Vector2(1,.707F));
     p*=Sin(_t);

@@ -7,6 +7,8 @@ class Texture
   readonly int        _height ;
   readonly Vector4[]  _pixels ;
   readonly Vector2    _dim    ;
+  readonly Vector2    _cscale ;
+  readonly Vector2    _coff   ;
 
   public Texture(int width, int height, Vector4[] pixels)
   {
@@ -15,6 +17,8 @@ class Texture
     _height = height;
     _pixels = pixels;
     _dim    = new(width, height);
+    _cscale = .5F*new Vector2(((float)height)/width,1F);
+    _coff   = new Vector2(.5F);
   }
 
   public static Texture LoadFromFile(string fileName)
@@ -77,10 +81,16 @@ class Texture
     var c1 = Texel(n0+new Vector2(1,0));
     var c2 = Texel(n0+new Vector2(0,1));
     var c3 = Texel(n0+new Vector2(1,1));
-    var c4 = Vector4.Lerp(c0,c1,f0.X);
-    var c5 = Vector4.Lerp(c2,c3,f0.X);
-    var c6 = Vector4.Lerp(c4,c5,f0.Y);
+    var c4 = Lerp(c0,c1,f0.X);
+    var c5 = Lerp(c2,c3,f0.X);
+    var c6 = Lerp(c4,c5,f0.Y);
 
     return c6;
   }
+
+  public Vector4 CenteredLinear(Vector2 p)
+  {
+    return Linear(FusedMultiplyAdd(_cscale,p,_coff));
+  }
+
 }

@@ -54,13 +54,13 @@
           {
             // Resolution doubler: U+2580
             c.SetSymbol('\x2580');
-            c.SetForeground(Run(x, y+y+0));
-            c.SetBackground(Run(x, y+y+1));
+            c.SetForeground(Run(x, y+y+0, c.Foreground));
+            c.SetBackground(Run(x, y+y+1, c.Background));
           }
         }
     });
   }
 
   protected abstract void Setup(int width, int height, double time);
-  protected abstract Color Run(int x, int y);
+  protected abstract Color Run(int x, int y, Color previous);
 }

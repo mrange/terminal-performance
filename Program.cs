@@ -1,5 +1,6 @@
 ﻿#define USE_SENDER
 #define USE_BACKBUFFER
+#define LIMIT_FPS
 
 Console.OutputEncoding = Encoding.UTF8;
 
@@ -22,10 +23,10 @@ var renderContext = new RenderContext(
   );
 
 var sw        = Stopwatch.StartNew();
-var shader    = new DolphinShader();
+var shader    = new StarFieldShader();
 var capacity  = viewPort.Width*viewPort.Height*64;
-var current   = new Buffer(capacity);
-var send      = new Buffer(capacity);
+var current   = new Utf8Buffer(capacity);
+var send      = new Utf8Buffer(capacity);
 var frameNo   = 0;
 var fpsFrameNo= 0;
 var isRunning = true;
@@ -38,11 +39,12 @@ using var stdOut = Console.OpenStandardOutput();
 #endif
 
 #if USE_BACKBUFFER
-var bufferState=true;
+var bufferState=false;
 #endif
 
 while (isRunning)
 {
+  var frameStart = sw.Elapsed.TotalSeconds;
   ++frameNo;
   ++fpsFrameNo;
   if(fpsFrameNo>120)
@@ -51,14 +53,14 @@ while (isRunning)
     fpsStart  = sw.Elapsed.TotalSeconds;
   }
 
+  shader.Render(renderContext, sw.Elapsed.TotalSeconds);
+
   current.Clear();
 
 #if USE_BACKBUFFER
   current.WriteDisableDECPCCM();
   current.WriteMoveToBuffer(bufferState);
 #endif
-
-  shader.Render(renderContext, sw.Elapsed.TotalSeconds);
 
   current.WritePrelude();
   
@@ -89,6 +91,16 @@ while (isRunning)
       isRunning = false;
     }
   }
+
+  var frameEnd = sw.Elapsed.TotalSeconds;
+  var waitFor= Math.Floor((1/120.0 + frameStart-frameStart)*1000);
+  if(waitFor>0)
+  {
+#if LIMIT_FPS
+    Thread.Sleep((int)waitFor);
+#endif
+  }
+
 }
 
 // Resets terminal
@@ -97,7 +109,7 @@ Console.WriteLine("\x1b[!p");
 #if USE_SENDER
 sealed class Sender : IDisposable
 {
-  sealed record Data(Buffer? Buffer);
+  sealed record Data(Utf8Buffer? Buffer);
   readonly Thread         _thread;
   readonly Stream         _stdOut;
   readonly object         _lock  = new();
@@ -110,7 +122,7 @@ sealed class Sender : IDisposable
     _thread.Start();
   }
 
-  public void Send(Buffer buffer)
+  public void Send(Utf8Buffer buffer)
   {
     lock(_lock)
     {
@@ -140,7 +152,7 @@ sealed class Sender : IDisposable
     {
       while(cont)
       {
-        Buffer? buffer=null;
+        Utf8Buffer? buffer=null;
 
         while(_data is null)
         {
@@ -163,7 +175,7 @@ sealed class Sender : IDisposable
 }
 #endif
 
-sealed class Buffer(int capacity)
+sealed class Utf8Buffer(int capacity)
 {
   public byte[] Bytes     = new byte[capacity];
   public int    Position  = 0;
@@ -242,24 +254,15 @@ sealed class Buffer(int capacity)
   [MethodImpl(MethodImplOptions.AggressiveInlining)]
   public void WriteBytes(byte[] s)
   {
-  /*
-    Array.Copy(s,0,Bytes,Position,s.Length);
+    Buffer.BlockCopy(s,0,Bytes,Position,s.Length);
     Position+=s.Length;
-    */
-    var t=Bytes;
-    var p=Position;
-    for (var i=0; i<s.Length; ++i)
-    {
-      t[p+i] = s[i];
-    }
-    Position=p+s.Length;
   }
 }
 
 class Cell()
 {
   public Color  Background = Color.Black;
-  public Color  Foreground = Color.White;
+  public Color  Foreground = Color.Black;
   public char   Symbol     = ' ';
 
   public void SetSymbol(char v)

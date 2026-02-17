@@ -83,4 +83,10 @@ static partial class ShaderMath
     var C=Vector3.Clamp(c,Vector3.Zero,Vector3.One)*_255;
     return new((byte)C.X,(byte)C.Y,(byte)C.Z);
   }
+
+  public static Vector3 FromColor(Color c)
+  {
+    return new Vector3(c.R,c.G,c.B)*_i255;
+  }
+
 }
